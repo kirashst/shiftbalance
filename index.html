@@ -1,0 +1,1431 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Coverboard (Copy)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#f9f9f7; --surface:#ffffff; --surface-2:#fcfcfb;
+    --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --line:#e1e0d9; --line-strong:#c3c2b7;
+    --accent:#4a3aa7; --accent-ink:#ffffff; --accent-soft:#efeafd; --accent-soft-ink:#3a2d86;
+    --pos-mgr:#2a78d6; --pos-lead:#eb6834; --pos-tech:#1baf7a;
+    --pos-mgr-soft:#e5f0fc; --pos-lead-soft:#fdece2; --pos-tech-soft:#e2f7ef;
+    --good:#0ca30c; --warn:#fab219; --crit:#d03b3b;
+    --good-ink:#0a6b0a; --warn-ink:#8a5a00; --crit-ink:#a72424;
+    --shadow: 0 1px 2px rgba(11,11,11,.06), 0 6px 20px rgba(11,11,11,.06);
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --page:#0d0d0d; --surface:#161615; --surface-2:#1a1a19;
+      --ink:#ffffff; --ink-2:#c3c2b7; --muted:#948f86;
+      --line:#2c2c2a; --line-strong:#383835;
+      --accent:#9085e9; --accent-ink:#0b0b0b; --accent-soft:#241f3d; --accent-soft-ink:#cabffb;
+      --pos-mgr:#3987e5; --pos-lead:#d95926; --pos-tech:#199e70;
+      --pos-mgr-soft:#182636; --pos-lead-soft:#301d13; --pos-tech-soft:#122a22;
+      --good:#0ca30c; --warn:#fab219; --crit:#e66767;
+      --good-ink:#5ad35a; --warn-ink:#fab219; --crit-ink:#ff9d9d;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --page:#0d0d0d; --surface:#161615; --surface-2:#1a1a19;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#948f86;
+    --line:#2c2c2a; --line-strong:#383835;
+    --accent:#9085e9; --accent-ink:#0b0b0b; --accent-soft:#241f3d; --accent-soft-ink:#cabffb;
+    --pos-mgr:#3987e5; --pos-lead:#d95926; --pos-tech:#199e70;
+    --pos-mgr-soft:#182636; --pos-lead-soft:#301d13; --pos-tech-soft:#122a22;
+    --good:#0ca30c; --warn:#fab219; --crit:#e66767;
+    --good-ink:#5ad35a; --warn-ink:#fab219; --crit-ink:#ff9d9d;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box;}
+  body{ background:var(--page); color:var(--ink); font-family:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif; }
+  h1,h2,h3,.disp{ font-family:"Archivo",system-ui,sans-serif; font-weight:800; letter-spacing:-.01em; text-wrap:balance; }
+  .mono{ font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums; }
+  button, select, input{ font-family:inherit; font-size:inherit; color:inherit; }
+  button{ cursor:pointer; }
+  a{ color:var(--accent); }
+  ::selection{ background:var(--accent-soft); }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:4px; }
+
+  #app{ min-height:100%; display:flex; flex-direction:column; }
+
+  /* ---- topbar ---- */
+  .topbar{
+    position:sticky; top:env(safe-area-inset-top,0px); z-index:40;
+    display:flex; align-items:center; gap:12px;
+    padding:10px 16px; background:var(--surface); border-bottom:1px solid var(--line);
+  }
+  .brand{ display:flex; align-items:center; gap:8px; font-family:"Archivo",sans-serif; font-weight:800; font-size:17px; white-space:nowrap; }
+  .brand .dot{ width:10px;height:10px;border-radius:3px; background:var(--accent); display:inline-block; }
+  .topbar-spacer{ flex:1; }
+  .role-switch{ display:flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:4px 6px 4px 10px; }
+  .role-switch label{ font-size:11px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.04em; }
+  select.roleSel{ border:none; background:transparent; font-weight:700; padding:6px 4px; border-radius:6px; }
+  select.roleSel:hover{ background:var(--line); }
+  .icon-btn{ position:relative; display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:10px; border:1px solid var(--line); background:var(--surface-2); }
+  .icon-btn:hover{ background:var(--line); }
+  .badge{ position:absolute; top:-4px; right:-4px; min-width:17px; height:17px; padding:0 4px; border-radius:9px; background:var(--crit); color:#fff; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; border:2px solid var(--surface); }
+  .theme-btn{ font-size:16px; }
+
+  /* ---- shell ---- */
+  .shell{ display:flex; flex:1; min-height:0; }
+  .sidenav{ width:216px; flex:none; padding:14px 10px; border-right:1px solid var(--line); background:var(--surface); display:flex; flex-direction:column; gap:2px; }
+  .navlabel{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); padding:10px 10px 4px; }
+  .navbtn{ display:flex; align-items:center; gap:10px; text-align:left; padding:9px 10px; border-radius:9px; border:none; background:transparent; color:var(--ink-2); font-weight:600; font-size:14px; }
+  .navbtn:hover{ background:var(--surface-2); color:var(--ink); }
+  .navbtn.active{ background:var(--accent-soft); color:var(--accent-soft-ink); }
+  .navbtn .ic{ width:18px; text-align:center; }
+
+  main{ flex:1; min-width:0; padding:22px clamp(16px,3vw,32px) 60px; }
+  .pagehead{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
+  .pagehead h1{ font-size:22px; margin:0; }
+  .pagehead p{ margin:4px 0 0; color:var(--ink-2); font-size:13.5px; }
+
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); }
+  .card-pad{ padding:16px 18px; }
+  .grid{ display:grid; gap:14px; }
+  .row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+  .btn{ display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:9px; border:1px solid var(--line-strong); background:var(--surface); font-weight:700; font-size:13px; color:var(--ink); }
+  .btn:hover{ background:var(--surface-2); }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .btn-primary{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+  .btn-primary:hover{ filter:brightness(1.06); }
+  .btn-primary:disabled{ background:var(--line-strong); border-color:var(--line-strong); color:var(--surface); }
+  .btn-ghost{ border-color:transparent; background:transparent; }
+  .btn-ghost:hover{ background:var(--surface-2); }
+  .btn-danger{ color:var(--crit-ink); border-color:var(--crit); }
+  .btn-sm{ padding:5px 10px; font-size:12px; border-radius:7px; }
+
+  select.field, input.field, textarea.field{ width:100%; padding:9px 11px; border-radius:9px; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); }
+  select.field:focus, input.field:focus, textarea.field:focus{ border-color:var(--accent); }
+  .field-label{ display:block; font-size:12px; font-weight:700; color:var(--ink-2); margin-bottom:5px; }
+  .field-wrap{ display:flex; flex-direction:column; gap:2px; }
+
+  .chip{ display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:999px; font-size:11.5px; font-weight:700; border:1px solid transparent; white-space:nowrap; }
+  .chip-mgr{ background:var(--pos-mgr-soft); color:var(--pos-mgr); }
+  .chip-lead{ background:var(--pos-lead-soft); color:var(--pos-lead); }
+  .chip-tech{ background:var(--pos-tech-soft); color:var(--pos-tech); }
+  .chip-good{ background:transparent; color:var(--good-ink); border-color:var(--good); }
+  .chip-warn{ background:transparent; color:var(--warn-ink); border-color:var(--warn); }
+  .chip-crit{ background:transparent; color:var(--crit-ink); border-color:var(--crit); }
+  .chip-neutral{ background:var(--surface-2); color:var(--ink-2); border-color:var(--line); }
+  .dot-ic{ width:7px;height:7px;border-radius:50%; background:currentColor; flex:none; }
+
+  table{ width:100%; border-collapse:collapse; font-size:13.5px; }
+  th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding:8px 10px; border-bottom:1px solid var(--line); }
+  td{ padding:10px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  tr:last-child td{ border-bottom:none; }
+  .tbl-wrap{ overflow-x:auto; }
+
+  /* calendar */
+  .cal{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+  .cal-dow{ font-size:11px; font-weight:700; color:var(--muted); text-align:center; padding-bottom:2px; text-transform:uppercase; letter-spacing:.04em; }
+  .cal-day{ position:relative; min-height:92px; border:1px solid var(--line); border-radius:10px; padding:6px 6px 7px; background:var(--surface-2); display:flex; flex-direction:column; gap:4px; text-align:left; }
+  .cal-day:hover{ border-color:var(--line-strong); }
+  .cal-day.out{ opacity:.38; }
+  .cal-day.today{ border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset; }
+  .cal-daynum{ font-weight:700; font-size:12.5px; }
+  .cal-shift{ font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:6px; display:flex; align-items:center; gap:4px; }
+  .cal-shift.mine{ box-shadow:0 0 0 1.5px var(--accent) inset; }
+  .cal-more{ font-size:10px; color:var(--muted); font-weight:700; padding-left:2px; }
+
+  /* meter bars (fairness) */
+  .meter-row{ display:grid; grid-template-columns:130px 1fr 64px; gap:10px; align-items:center; padding:7px 0; }
+  .meter-track{ height:10px; border-radius:6px; background:var(--line); overflow:hidden; position:relative; }
+  .meter-fill{ height:100%; border-radius:6px; }
+  .stat-tile{ padding:14px 16px; border:1px solid var(--line); border-radius:12px; background:var(--surface-2); }
+  .stat-tile .num{ font-size:24px; font-weight:800; font-family:"Archivo",sans-serif; }
+  .stat-tile .lbl{ font-size:11.5px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.04em; margin-top:2px; }
+
+  /* modal */
+  .overlay{ position:fixed; inset:0; background:rgba(11,11,11,.45); display:flex; align-items:center; justify-content:center; padding:16px; z-index:100; }
+  .modal{ background:var(--surface); border-radius:16px; width:100%; max-width:480px; max-height:88vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.35); border:1px solid var(--line); }
+  .modal-head{ display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--surface); }
+  .modal-head h3{ font-size:16px; margin:0; }
+  .modal-body{ padding:16px 18px; display:flex; flex-direction:column; gap:12px; }
+  .modal-foot{ padding:14px 18px; border-top:1px solid var(--line); display:flex; justify-content:flex-end; gap:8px; }
+  .x-btn{ border:none; background:transparent; font-size:18px; color:var(--muted); width:30px; height:30px; border-radius:8px; }
+  .x-btn:hover{ background:var(--surface-2); }
+  .note{ font-size:12px; color:var(--muted); line-height:1.5; }
+  .warnbox{ display:flex; gap:8px; padding:10px 12px; border-radius:10px; background:var(--pos-lead-soft); border:1px solid var(--warn); font-size:12.5px; color:var(--ink); }
+  .list-pick{ display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; }
+  .pick-row{ display:flex; align-items:center; gap:9px; padding:8px 10px; border:1px solid var(--line); border-radius:9px; }
+  .pick-row.sel{ border-color:var(--accent); background:var(--accent-soft); }
+  .empty-state{ padding:30px 14px; text-align:center; color:var(--muted); font-size:13.5px; }
+  .avatar{ width:26px;height:26px;border-radius:50%; background:var(--accent-soft); color:var(--accent-soft-ink); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; flex:none; }
+  hr.sep{ border:none; border-top:1px solid var(--line); margin:2px 0; }
+
+  .demo-banner{ background:var(--accent-soft); color:var(--accent-soft-ink); font-size:12.5px; padding:8px 16px; text-align:center; font-weight:600; }
+  .demo-banner b{ font-weight:800; }
+
+  @media (max-width:820px){
+    .sidenav{ position:sticky; top:calc(53px + env(safe-area-inset-top,0px)); z-index:30; width:100%; flex-direction:row; overflow-x:auto; border-right:none; border-bottom:1px solid var(--line); padding:8px 10px; }
+    .navlabel{ display:none; }
+    .navbtn{ white-space:nowrap; }
+    .shell{ flex-direction:column; }
+    main{ padding:16px 16px 60px; }
+    .meter-row{ grid-template-columns:96px 1fr 50px; }
+  }
+</style>
+
+<div id="app"></div>
+<div id="modalRoot"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================== DATA MODEL ============================== */
+
+const POSITIONS = [
+  {id:'mgr',  name:'Site Manager',        short:'Manager', minLevel:3, chip:'chip-mgr'},
+  {id:'lead', name:'Shift Lead',          short:'Lead',    minLevel:2, chip:'chip-lead'},
+  {id:'tech', name:'Cleaning Technician', short:'Tech',    minLevel:1, chip:'chip-tech'},
+];
+const posById = id => POSITIONS.find(p=>p.id===id);
+
+const EMPLOYEES = [
+  {id:'e1',  name:'Jordan Cole',    home:'mgr',  level:3, type:'full-time', rate:26},
+  {id:'e2',  name:'Priya Nair',     home:'lead', level:2, type:'full-time', rate:20},
+  {id:'e3',  name:'Avery Kim',      home:'lead', level:2, type:'full-time', rate:20},
+  {id:'e4',  name:'Marcus Diaz',    home:'lead', level:2, type:'part-time', rate:20},
+  {id:'e5',  name:'Sam Whitfield',  home:'tech', level:1, type:'full-time', rate:17},
+  {id:'e6',  name:'Dana Ruiz',      home:'tech', level:1, type:'full-time', rate:17},
+  {id:'e7',  name:'Morgan Lee',     home:'tech', level:1, type:'full-time', rate:17},
+  {id:'e8',  name:'Chris Okafor',   home:'tech', level:1, type:'part-time', rate:17},
+  {id:'e9',  name:'Taylor Brooks',  home:'tech', level:1, type:'part-time', rate:17},
+  {id:'e10', name:'Riley Singh',    home:'tech', level:1, type:'part-time', rate:17},
+];
+const empById = id => EMPLOYEES.find(e=>e.id===id);
+
+// Weekly recurring staffing template. dayOfWeek: 0=Sun..6=Sat.
+let RULES = [];
+(function buildRules(){
+  let n=0;
+  [1,2,3,4,5].forEach(d=>{
+    RULES.push({id:'r'+(++n), dayOfWeek:d, position:'mgr',  start:'08:00', end:'16:00', count:1, overlap:0});
+    RULES.push({id:'r'+(++n), dayOfWeek:d, position:'lead', start:'08:00', end:'12:30', count:1, overlap:30});
+    RULES.push({id:'r'+(++n), dayOfWeek:d, position:'lead', start:'12:00', end:'16:00', count:1, overlap:30});
+    RULES.push({id:'r'+(++n), dayOfWeek:d, position:'tech', start:'08:00', end:'12:15', count:3, overlap:15});
+    RULES.push({id:'r'+(++n), dayOfWeek:d, position:'tech', start:'12:00', end:'16:00', count:2, overlap:15});
+  });
+  RULES.push({id:'r'+(++n), dayOfWeek:6, position:'lead', start:'09:00', end:'13:00', count:1, overlap:0});
+  RULES.push({id:'r'+(++n), dayOfWeek:6, position:'tech', start:'09:00', end:'13:00', count:2, overlap:0});
+})();
+
+// Weekly recurring availability windows per employee. day -> [{start,end}] ; missing/[] = unavailable that day.
+const ALL_DAY = {0:[],1:[{start:'06:30',end:'20:00'}],2:[{start:'06:30',end:'20:00'}],3:[{start:'06:30',end:'20:00'}],4:[{start:'06:30',end:'20:00'}],5:[{start:'06:30',end:'20:00'}],6:[{start:'07:00',end:'18:00'}]};
+let AVAILABILITY = {};
+EMPLOYEES.forEach(e=> AVAILABILITY[e.id] = JSON.parse(JSON.stringify(ALL_DAY)) );
+AVAILABILITY['e8'] = {0:[],1:[{start:'11:30',end:'20:00'}],2:[{start:'11:30',end:'20:00'}],3:[{start:'11:30',end:'20:00'}],4:[{start:'11:30',end:'20:00'}],5:[{start:'11:30',end:'20:00'}],6:[]};
+AVAILABILITY['e9'] = {0:[],1:[],2:[{start:'06:30',end:'20:00'}],3:[],4:[{start:'06:30',end:'20:00'}],5:[],6:[{start:'07:00',end:'18:00'}]};
+AVAILABILITY['e10']= {0:[],1:[{start:'06:30',end:'20:00'}],2:[{start:'06:30',end:'20:00'}],3:[],4:[{start:'06:30',end:'20:00'}],5:[{start:'06:30',end:'20:00'}],6:[{start:'07:00',end:'18:00'}]};
+
+/* ============================== STATE ============================== */
+
+let TODAY = new Date(2026,8,17); // Sep 17 2026 — fixed "today" for this demo
+let shiftStore = {};   // id -> shift object
+let requests = [];     // request objects
+let notifications = []; // notification log
+let uidCounter = 1;
+const uid = p => p + (uidCounter++);
+
+let user = {kind:'manager', empId:null};
+let viewMonth = {y:2026, m:8}; // 0-indexed month, Sep=8
+let nav = {manager:'schedule', employee:'schedule'};
+let payrollWeek = null; // set at init
+let modal = null; // {type,...}
+
+/* ============================== DATE / TIME HELPERS ============================== */
+
+function pad2(n){ return String(n).padStart(2,'0'); }
+function dstr(y,m,d){ return y+'-'+pad2(m+1)+'-'+pad2(d); }
+function parseD(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+function dowOf(s){ return parseD(s).getDay(); }
+function addDaysStr(s,n){ const d=parseD(s); d.setDate(d.getDate()+n); return dstr(d.getFullYear(),d.getMonth(),d.getDate()); }
+function toMin(t){ const [h,m]=t.split(':').map(Number); return h*60+m; }
+function hoursOfRange(a,b){ return (toMin(b)-toMin(a))/60; }
+function fmtTime(t){ const [h,m]=t.split(':').map(Number); const hh=((h+11)%12)+1; return hh+(m?':'+pad2(m):'')+(h<12?'am':'pm'); }
+const MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DOW_SHORT=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function fmtDateLong(s){ const d=parseD(s); return DOW_SHORT[d.getDay()]+', '+MONTH_NAMES[d.getMonth()]+' '+d.getDate(); }
+function fmtDateShort(s){ const d=parseD(s); return MONTH_NAMES[d.getMonth()].slice(0,3)+' '+d.getDate(); }
+function mondayOf(s){ const d=parseD(s); const wd=(d.getDay()+6)%7; d.setDate(d.getDate()-wd); return dstr(d.getFullYear(),d.getMonth(),d.getDate()); }
+function todayStr(){ return dstr(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()); }
+function isPastOrToday(s){ return s <= todayStr(); }
+function timeNow(){ return new Date().toISOString(); }
+
+/* ============================== SHIFT GENERATION ============================== */
+
+function genRangeShifts(fromStr, toStr, opts){
+  opts = opts||{};
+  let cur = fromStr;
+  const created = [];
+  while(cur <= toStr){
+    const dow = dowOf(cur);
+    RULES.filter(r=>r.dayOfWeek===dow).forEach(rule=>{
+      for(let slot=0; slot<rule.count; slot++){
+        const id = cur+'__'+rule.id+'__'+slot;
+        if(shiftStore[id]) return;
+        const s = {
+          id, date:cur, ruleId:rule.id, position:rule.position, slot,
+          start:rule.start, end:rule.end, overlap:rule.overlap,
+          employeeId:null, status:'open', // open | assigned | pending_direct | covered_note
+          askedEmployeeId:null, note:null, swapPeerId:null
+        };
+        shiftStore[id] = s;
+        created.push(s);
+      }
+    });
+    cur = addDaysStr(cur,1);
+  }
+  return created;
+}
+
+function shiftHours(s){ return hoursOfRange(s.start,s.end); }
+
+function weeklyHours(empId, anyDateInWeek, excludeShiftId){
+  const wkStart = mondayOf(anyDateInWeek);
+  const wkEnd = addDaysStr(wkStart,6);
+  let total = 0;
+  Object.values(shiftStore).forEach(s=>{
+    if(s.employeeId===empId && s.date>=wkStart && s.date<=wkEnd && s.id!==excludeShiftId && s.status!=='open'){
+      total += shiftHours(s);
+    }
+  });
+  return total;
+}
+
+function capFor(emp){ return emp.type==='part-time' ? 39.9 : 40; }
+
+function isEligible(emp, positionId){ return emp.level >= posById(positionId).minLevel; }
+
+function isAvailable(empId, dateStr, start, end){
+  const windows = (AVAILABILITY[empId]||{})[dowOf(dateStr)] || [];
+  return windows.some(w => w.start<=start && w.end>=end);
+}
+
+function doubleBooked(empId, shift, excludeShiftId){
+  return Object.values(shiftStore).some(s=>
+    s.employeeId===empId && s.date===shift.date && s.id!==shift.id && s.id!==excludeShiftId && s.status!=='open' &&
+    toMin(s.start) < toMin(shift.end) && toMin(shift.start) < toMin(s.end)
+  );
+}
+
+function evaluateAssign(empId, shift, opts){
+  opts = opts||{};
+  const emp = empById(empId);
+  const reasons = [];
+  if(!isEligible(emp, shift.position)) reasons.push('Not qualified — requires '+posById(shift.position).name+' level or higher.');
+  if(!opts.ignoreDouble && doubleBooked(empId, shift)) reasons.push('Overlaps another shift already on their schedule that day.');
+  const wk = weeklyHours(empId, shift.date, shift.id) + shiftHours(shift);
+  const cap = capFor(emp);
+  if(!opts.ignoreCap && wk > cap + 1e-9) reasons.push('Would put them at '+wk.toFixed(1)+' hrs this week — over their '+cap+' hr limit.');
+  const caution = [];
+  if(!isAvailable(empId, shift.date, shift.start, shift.end)) caution.push('Outside the availability they set for this day.');
+  return {ok: reasons.length===0, reasons, caution, projectedHours: wk, cap};
+}
+
+/* ============================== SEED SCHEDULE ============================== */
+
+function seedFill(fromStr, toStr){
+  const created = genRangeShifts(fromStr, toStr);
+  const pointers = {};
+  created.sort((a,b)=> a.date===b.date ? a.ruleId.localeCompare(b.ruleId) : (a.date<b.date?-1:1));
+  created.forEach(shift=>{
+    const homies = EMPLOYEES.filter(e=>e.home===shift.position);
+    const others = EMPLOYEES.filter(e=>e.home!==shift.position && isEligible(e, shift.position));
+    const pool = homies.concat(others);
+    const key = shift.position;
+    if(pointers[key]===undefined) pointers[key]=0;
+    let placed = false;
+    for(let i=0;i<pool.length;i++){
+      const idx = (pointers[key]+i) % pool.length;
+      const cand = pool[idx];
+      const ev = evaluateAssign(cand.id, shift);
+      if(ev.ok){
+        shift.employeeId = cand.id;
+        shift.status = 'assigned';
+        pointers[key] = idx+1;
+        placed = true;
+        break;
+      }
+    }
+  });
+}
+
+function addNotification(text, kind){
+  notifications.unshift({id:uid('n'), text, kind, ts:timeNow(), read:false});
+}
+
+function seedNarrative(){
+  // A currently-open callout (posted to all eligible)
+  const openShift = Object.values(shiftStore).find(s=> s.date==='2026-09-18' && s.position==='tech' && s.status==='assigned' && s.employeeId);
+  if(openShift){
+    const fromId = openShift.employeeId;
+    const empName = empById(fromId).name;
+    openShift.status='open'; openShift.note='Family emergency'; openShift.employeeId=null;
+    requests.push({id:uid('rq'), kind:'callout', shiftId:openShift.id, fromEmp:fromId, toEmp:null, status:'open', createdAt:timeNow(), note:'Family emergency'});
+    addNotification(empName+' called out of '+posById(openShift.position).name+' · '+fmtDateShort(openShift.date)+' '+fmtTime(openShift.start)+'–'+fmtTime(openShift.end)+'. Open to all eligible coworkers.', 'callout');
+  }
+  // A direct ask pending
+  const directShift = Object.values(shiftStore).find(s=> s.date==='2026-09-19' && s.position==='lead' && s.status==='assigned' && s.employeeId);
+  if(directShift){
+    const fromId = directShift.employeeId;
+    const target = EMPLOYEES.find(e=> e.home==='lead' && e.id!==fromId) || EMPLOYEES.find(e=> isEligible(e,'lead') && e.id!==fromId);
+    if(target){
+      directShift.status='pending_direct'; directShift.askedEmployeeId=target.id; directShift.employeeId=null;
+      requests.push({id:uid('rq'), kind:'callout', shiftId:directShift.id, fromEmp:fromId, toEmp:target.id, status:'pending_direct', createdAt:timeNow(), note:'Dentist appointment'});
+      addNotification(empById(fromId).name+' asked '+target.name+' to cover '+posById(directShift.position).name+' · '+fmtDateShort(directShift.date)+'. Awaiting response.', 'callout');
+    }
+  }
+  // A pending swap
+  const mine = Object.values(shiftStore).find(s=> s.date==='2026-09-21' && s.position==='tech' && s.status==='assigned' && s.employeeId);
+  const theirs = mine && Object.values(shiftStore).find(s=> s.date==='2026-09-22' && s.position==='tech' && s.status==='assigned' && s.employeeId && s.employeeId!==mine.employeeId);
+  if(mine && theirs){
+    const rq = {id:uid('rq'), kind:'swap', shiftId:mine.id, fromEmp:mine.employeeId, toEmp:theirs.employeeId, targetShiftId:theirs.id, status:'pending', createdAt:timeNow(), note:''};
+    requests.push(rq);
+    mine.status='swap_pending'; mine.swapPeerId=rq.id; theirs.status='swap_pending'; theirs.swapPeerId=rq.id;
+    addNotification(empById(mine.employeeId).name+' proposed a swap with '+empById(theirs.employeeId).name+' for '+fmtDateShort(mine.date)+' / '+fmtDateShort(theirs.date)+'. Awaiting response.', 'swap');
+  }
+  // Resolved history items (already handled, shown for context)
+  const pastCovered = Object.values(shiftStore).find(s=> s.date==='2026-09-16' && s.position==='tech' && s.status==='assigned' && s.employeeId);
+  if(pastCovered){
+    const coveredBy = pastCovered.employeeId;
+    const originally = EMPLOYEES.find(e=> e.home==='tech' && e.id!==coveredBy).id;
+    requests.push({id:uid('rq'), kind:'callout', shiftId:pastCovered.id, fromEmp:originally, toEmp:coveredBy, status:'covered', coveredBy, createdAt:timeNow(), note:''});
+    addNotification(empById(originally).name+' called out of '+posById('tech').name+' · Sep 16, '+fmtTime(pastCovered.start)+'–'+fmtTime(pastCovered.end)+'. '+empById(coveredBy).name+' picked it up — covered.', 'covered');
+  }
+  const pastSwap = Object.values(shiftStore).find(s=> s.date==='2026-09-15' && s.position==='lead' && s.status==='assigned' && s.employeeId);
+  if(pastSwap){
+    const a = pastSwap.employeeId;
+    const b = (EMPLOYEES.find(e=> e.home==='lead' && e.id!==a) || EMPLOYEES.find(e=> isEligible(e,'lead') && e.id!==a)).id;
+    requests.push({id:uid('rq'), kind:'callout', shiftId:pastSwap.id, fromEmp:b, toEmp:a, status:'covered', coveredBy:a, createdAt:timeNow(), note:''});
+    addNotification(empById(b).name+' asked '+empById(a).name+' to cover '+posById('lead').name+' · Sep 15 — accepted.', 'covered');
+  }
+  notifications.slice(0,2).forEach(n=> n.read=true);
+}
+
+function initData(){
+  seedFill('2026-08-01','2026-11-30');
+  seedNarrative();
+  payrollWeek = mondayOf(todayStr());
+}
+
+/* ============================== PARITY ============================== */
+
+function parityForHome(homeId, weekStart){
+  const emps = EMPLOYEES.filter(e=>e.home===homeId);
+  const hours = emps.map(e=> ({emp:e, hrs: weeklyHours(e.id, weekStart)}) );
+  const vals = hours.map(h=>h.hrs);
+  const max = Math.max.apply(null, vals.concat([0]));
+  const min = vals.length? Math.min.apply(null, vals) : 0;
+  const avg = vals.length? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+  const score = max<=0 ? 100 : Math.round((1-(max-min)/max)*100);
+  return {position:posById(homeId), hours, max, min, avg, score};
+}
+
+function overallParity(weekStart){
+  const groups = ['mgr','lead','tech'].map(id=>parityForHome(id, weekStart)).filter(g=>g.hours.length>1);
+  if(!groups.length) return 100;
+  return Math.round(groups.reduce((a,g)=>a+g.score,0)/groups.length);
+}
+
+/* ============================== PERSISTENCE (per-viewer convenience only) ============================== */
+
+function saveLocal(){
+  try{
+    localStorage.setItem('coverboard_v1', JSON.stringify({shiftStore, requests, notifications, AVAILABILITY, EMPLOYEES, RULES, uidCounter}));
+  }catch(e){ /* ignore — in-memory state still works */ }
+}
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem('coverboard_v1');
+    if(!raw) return false;
+    const d = JSON.parse(raw);
+    if(!d || !d.shiftStore) return false;
+    shiftStore = d.shiftStore; requests = d.requests||[]; notifications = d.notifications||[];
+    if(d.AVAILABILITY) AVAILABILITY = d.AVAILABILITY;
+    if(d.RULES) RULES = d.RULES;
+    if(d.EMPLOYEES) d.EMPLOYEES.forEach(se=>{ const e=empById(se.id); if(e){ e.type=se.type; e.rate=se.rate; e.level=se.level; } });
+    uidCounter = d.uidCounter||1;
+    payrollWeek = mondayOf(todayStr());
+    return true;
+  }catch(e){ return false; }
+}
+function resetDemo(){
+  try{ localStorage.removeItem('coverboard_v1'); }catch(e){}
+  shiftStore={}; requests=[]; notifications=[]; uidCounter=1;
+  EMPLOYEES.forEach((e,i)=>{ /* restore base rates/types from original literals via closures not kept — acceptable: reload page state fresh */ });
+  initData();
+  render();
+}
+
+/* ============================== ACTIONS ============================== */
+
+function assignShift(shiftId, empId, opts){
+  const s = shiftStore[shiftId];
+  s.employeeId = empId; s.status='assigned'; s.askedEmployeeId=null; s.note=null; s.swapPeerId=null;
+  saveLocal();
+}
+
+function grabShift(shiftId, empId){
+  const s = shiftStore[shiftId];
+  const ev = evaluateAssign(empId, s);
+  if(!ev.ok) return ev;
+  const req = requests.find(r=> r.shiftId===shiftId && ['open','pending_direct'].includes(r.status));
+  if(req){ req.status='covered'; req.coveredBy=empId; }
+  assignShift(shiftId, empId);
+  addNotification(empById(empId).name+' picked up '+posById(s.position).name+' · '+fmtDateShort(s.date)+' '+fmtTime(s.start)+'–'+fmtTime(s.end)+'. Covered.', 'covered');
+  return {ok:true};
+}
+
+function calloutShift(shiftId, mode, targetEmpId, note){
+  const s = shiftStore[shiftId];
+  const fromEmp = s.employeeId;
+  s.employeeId = null;
+  s.status = mode==='direct' ? 'pending_direct' : 'open';
+  s.askedEmployeeId = mode==='direct' ? targetEmpId : null;
+  s.note = note||null;
+  const req = {id:uid('rq'), kind:'callout', shiftId, fromEmp, toEmp: mode==='direct'?targetEmpId:null, status: mode==='direct'?'pending_direct':'open', createdAt:timeNow(), note:note||''};
+  requests.push(req);
+  const who = empById(fromEmp).name;
+  if(mode==='direct'){
+    addNotification(who+' called out and asked '+empById(targetEmpId).name+' to cover '+posById(s.position).name+' · '+fmtDateShort(s.date)+'.', 'callout');
+  } else {
+    addNotification(who+' called out of '+posById(s.position).name+' · '+fmtDateShort(s.date)+' '+fmtTime(s.start)+'–'+fmtTime(s.end)+'. Open to all eligible coworkers.', 'callout');
+  }
+  saveLocal();
+}
+
+function respondDirectAsk(shiftId, accept){
+  const s = shiftStore[shiftId];
+  const req = requests.find(r=> r.shiftId===shiftId && r.status==='pending_direct');
+  if(!req) return;
+  if(accept){
+    const ev = evaluateAssign(req.toEmp, s);
+    if(!ev.ok) return ev;
+    req.status='covered'; req.coveredBy=req.toEmp;
+    assignShift(shiftId, req.toEmp);
+    addNotification(empById(req.toEmp).name+' accepted the request and will cover '+posById(s.position).name+' · '+fmtDateShort(s.date)+'.', 'covered');
+  } else {
+    req.status='declined_direct';
+    s.status='open'; s.askedEmployeeId=null;
+    const req2 = {id:uid('rq'), kind:'callout', shiftId, fromEmp:req.fromEmp, toEmp:null, status:'open', createdAt:timeNow(), note:req.note};
+    requests.push(req2);
+    addNotification(empById(req.toEmp).name+' declined to cover — reopened to all eligible coworkers for '+posById(s.position).name+' · '+fmtDateShort(s.date)+'.', 'attention');
+  }
+  saveLocal();
+  return {ok:true};
+}
+
+function managerDenyRequest(reqId){
+  const req = requests.find(r=>r.id===reqId);
+  if(!req) return;
+  req.status='denied_manager';
+  const s = shiftStore[req.shiftId];
+  if(s){ s.status='open'; s.askedEmployeeId=null; }
+  addNotification('You denied the open request for '+posById(s.position).name+' · '+fmtDateShort(s.date)+'. It still needs a direct assignment.', 'attention');
+  saveLocal();
+}
+
+function managerOverride(shiftId, empId, force){
+  const s = shiftStore[shiftId];
+  const ev = evaluateAssign(empId, s, {ignoreCap:force, ignoreDouble:force});
+  if(!ev.ok && !force) return ev;
+  const openReq = requests.find(r=> r.shiftId===shiftId && ['open','pending_direct'].includes(r.status));
+  if(openReq) openReq.status='denied_manager';
+  assignShift(shiftId, empId);
+  addNotification('Manager assigned '+empById(empId).name+' to '+posById(s.position).name+' · '+fmtDateShort(s.date)+(force?' (override).':'.'), 'override');
+  return {ok:true};
+}
+
+function managerOpenShift(shiftId){
+  const s = shiftStore[shiftId];
+  s.employeeId=null; s.status='open'; s.askedEmployeeId=null;
+  addNotification('Manager marked '+posById(s.position).name+' · '+fmtDateShort(s.date)+' as open.', 'attention');
+  saveLocal();
+}
+
+function proposeSwap(myShiftId, theirShiftId, note){
+  const mine = shiftStore[myShiftId], theirs = shiftStore[theirShiftId];
+  const req = {id:uid('rq'), kind:'swap', shiftId:myShiftId, fromEmp:mine.employeeId, toEmp:theirs.employeeId, targetShiftId:theirShiftId, status:'pending', createdAt:timeNow(), note:note||''};
+  requests.push(req);
+  mine.status='swap_pending'; mine.swapPeerId=req.id;
+  theirs.status='swap_pending'; theirs.swapPeerId=req.id;
+  addNotification(empById(mine.employeeId).name+' proposed a swap with '+empById(theirs.employeeId).name+' — '+fmtDateShort(mine.date)+' / '+fmtDateShort(theirs.date)+'.', 'swap');
+  saveLocal();
+}
+
+function respondSwap(reqId, accept){
+  const req = requests.find(r=>r.id===reqId);
+  const mine = shiftStore[req.shiftId], theirs = shiftStore[req.targetShiftId];
+  if(accept){
+    const evA = evaluateAssign(req.toEmp, mine, {ignoreDouble:false});
+    const evB = evaluateAssign(req.fromEmp, theirs, {ignoreDouble:false});
+    if(!evA.ok || !evB.ok){ return {ok:false, reasons:(evA.reasons||[]).concat(evB.reasons||[])}; }
+    const a = req.fromEmp, b = req.toEmp;
+    mine.employeeId = b; mine.status='assigned'; mine.swapPeerId=null;
+    theirs.employeeId = a; theirs.status='assigned'; theirs.swapPeerId=null;
+    req.status='accepted';
+    addNotification(empById(a).name+' and '+empById(b).name+' swapped shifts on '+fmtDateShort(mine.date)+' / '+fmtDateShort(theirs.date)+'.', 'swap');
+  } else {
+    mine.status='assigned'; mine.swapPeerId=null;
+    theirs.status='assigned'; theirs.swapPeerId=null;
+    req.status='declined';
+    addNotification(empById(req.toEmp).name+' declined the swap proposed by '+empById(req.fromEmp).name+'.', 'attention');
+  }
+  saveLocal();
+  return {ok:true};
+}
+
+function setAvailabilityDay(empId, day, enabled, start, end){
+  if(!AVAILABILITY[empId]) AVAILABILITY[empId]={};
+  AVAILABILITY[empId][day] = enabled ? [{start,end}] : [];
+  saveLocal();
+}
+
+/* ============================== RENDER HELPERS ============================== */
+
+function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function initials(name){ return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+
+function statusChip(s){
+  if(s.status==='assigned') return '<span class="chip chip-good"><span class="dot-ic"></span>Covered</span>';
+  if(s.status==='open') return '<span class="chip chip-crit"><span class="dot-ic"></span>Open</span>';
+  if(s.status==='pending_direct') return '<span class="chip chip-warn"><span class="dot-ic"></span>Awaiting reply</span>';
+  if(s.status==='swap_pending') return '<span class="chip chip-warn"><span class="dot-ic"></span>Swap pending</span>';
+  return '<span class="chip chip-neutral">—</span>';
+}
+
+function posChip(positionId){
+  const p = posById(positionId);
+  return '<span class="chip '+p.chip+'">'+p.short+'</span>';
+}
+
+function shiftLabel(s){
+  return posById(s.position).short+' · '+fmtTime(s.start)+'–'+fmtTime(s.end);
+}
+
+/* ============================== TOPBAR ============================== */
+
+function renderTopbar(){
+  const unread = notifications.filter(n=>!n.read).length;
+  const roleOptions = ['<option value="manager">Manager — you</option>']
+    .concat(EMPLOYEES.map(e=>'<option value="'+e.id+'" '+(user.kind==='employee'&&user.empId===e.id?'selected':'')+'>'+esc(e.name)+' — '+posById(e.home).short+'</option>'));
+  return `
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span>Coverboard</div>
+    <div class="topbar-spacer"></div>
+    <div class="role-switch">
+      <label>Viewing&nbsp;as</label>
+      <select class="roleSel" data-act="switchRole">
+        <option value="manager" ${user.kind==='manager'?'selected':''}>Manager — you</option>
+        ${EMPLOYEES.map(e=>'<option value="'+e.id+'" '+(user.kind==='employee'&&user.empId===e.id?'selected':'')+'>'+esc(e.name)+'</option>').join('')}
+      </select>
+    </div>
+    <button class="icon-btn" data-act="openNotif" title="Notifications">🔔${unread?'<span class="badge">'+unread+'</span>':''}</button>
+    <button class="icon-btn" data-act="resetDemo" title="Reset demo data">↺</button>
+  </div>`;
+}
+
+/* ============================== MANAGER: SCHEDULE ============================== */
+
+function monthMatrix(y,m){
+  const first = new Date(y,m,1);
+  const startPad = first.getDay();
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const cells = [];
+  for(let i=0;i<startPad;i++){
+    const d = new Date(y,m,1-(startPad-i));
+    cells.push({date:dstr(d.getFullYear(),d.getMonth(),d.getDate()), out:true});
+  }
+  for(let d=1; d<=daysInMonth; d++) cells.push({date:dstr(y,m,d), out:false});
+  while(cells.length%7!==0 || cells.length<42){
+    const last = parseD(cells[cells.length-1].date);
+    last.setDate(last.getDate()+1);
+    cells.push({date:dstr(last.getFullYear(),last.getMonth(),last.getDate()), out:true});
+    if(cells.length>=42) break;
+  }
+  return cells;
+}
+
+function shiftsOnDate(dateStr){
+  return Object.values(shiftStore).filter(s=>s.date===dateStr).sort((a,b)=> a.position.localeCompare(b.position) || toMin(a.start)-toMin(b.start));
+}
+
+function renderCalendar(highlightEmpId, onDayClick){
+  const {y,m} = viewMonth;
+  const cells = monthMatrix(y,m);
+  const t = todayStr();
+  let html = `<div class="row" style="justify-content:space-between;margin-bottom:10px;">
+    <div class="row">
+      <button class="btn btn-sm" data-act="monthPrev">← Prev</button>
+      <button class="btn btn-sm" data-act="monthToday">Today</button>
+      <button class="btn btn-sm" data-act="monthNext">Next →</button>
+    </div>
+    <h3 style="margin:0;">${MONTH_NAMES[m]} ${y}</h3>
+  </div>
+  <div class="cal">`;
+  DOW_SHORT.forEach(d=> html += `<div class="cal-dow">${d}</div>`);
+  cells.forEach(c=>{
+    const shifts = shiftsOnDate(c.date);
+    const mine = highlightEmpId ? shifts.filter(s=>s.employeeId===highlightEmpId) : [];
+    const openCount = shifts.filter(s=>s.status==='open').length;
+    const showList = highlightEmpId ? mine.concat(shifts.filter(s=>s.status==='open')).slice(0,3) : shifts.slice(0,4);
+    html += `<button class="cal-day ${c.out?'out':''} ${c.date===t?'today':''}" data-act="dayClick" data-date="${c.date}">
+      <span class="cal-daynum">${parseD(c.date).getDate()}</span>
+      ${showList.map(s=>{
+        const isMine = s.employeeId===highlightEmpId;
+        const bg = s.status==='open' ? 'background:var(--pos-'+s.position+'-soft);color:var(--crit-ink);border:1px dashed var(--crit);' : 'background:var(--pos-'+s.position+'-soft);color:var(--pos-'+s.position+');';
+        return `<span class="cal-shift ${isMine?'mine':''}" style="${bg}">${posById(s.position).short}${s.status==='open'?' · open':''}</span>`;
+      }).join('')}
+      ${shifts.length>showList.length ? '<span class="cal-more">+'+(shifts.length-showList.length)+' more</span>' : ''}
+    </button>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function renderManagerSchedule(){
+  return `
+  <div class="pagehead">
+    <div><h1>Schedule</h1><p>Tap a day to see every shift, who's covering it, and make changes.</p></div>
+  </div>
+  <div class="card card-pad">${renderCalendar(null)}</div>
+  <div class="row" style="margin-top:14px;gap:16px;">
+    <span class="chip chip-good"><span class="dot-ic"></span>Covered</span>
+    <span class="chip chip-crit"><span class="dot-ic"></span>Open — needs coverage</span>
+    <span class="chip chip-warn"><span class="dot-ic"></span>Pending response</span>
+  </div>`;
+}
+
+/* ============================== MANAGER: STAFFING RULES ============================== */
+
+function renderManagerRules(){
+  const byDay = {};
+  RULES.forEach(r=>{ (byDay[r.dayOfWeek]=byDay[r.dayOfWeek]||[]).push(r); });
+  const order = [1,2,3,4,5,6,0];
+  return `
+  <div class="pagehead">
+    <div><h1>Staffing rules</h1><p>Tell Coverboard what's needed each day — position, headcount, and handoff overlap. It builds the schedule from this.</p></div>
+    <button class="btn btn-primary" data-act="addRule">+ Add rule</button>
+  </div>
+  <div class="grid" style="gap:12px;">
+  ${order.filter(d=>byDay[d]).map(d=>`
+    <div class="card card-pad">
+      <h3 style="margin:0 0 10px;font-size:14px;">${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d]}</h3>
+      <div class="tbl-wrap"><table>
+        <tr><th>Position</th><th>Time</th><th>Needed</th><th>Handoff overlap</th><th></th></tr>
+        ${byDay[d].map(r=>`<tr>
+          <td>${posChip(r.position)}</td>
+          <td class="mono">${fmtTime(r.start)}–${fmtTime(r.end)}</td>
+          <td class="mono">${r.count}</td>
+          <td class="mono">${r.overlap} min</td>
+          <td><div class="row" style="gap:6px;">
+            <button class="btn btn-sm" data-act="editRule" data-id="${r.id}">Edit</button>
+            <button class="btn btn-sm btn-danger" data-act="delRule" data-id="${r.id}">Delete</button>
+          </div></td>
+        </tr>`).join('')}
+      </table></div>
+    </div>`).join('')}
+  </div>
+  <div class="row" style="margin-top:16px;">
+    <button class="btn" data-act="regenFuture">Apply rule changes to upcoming dates</button>
+    <span class="note">Regenerates open shifts for dates after today that don't already have someone assigned. Past and already-assigned shifts are untouched.</span>
+  </div>`;
+}
+
+/* ============================== MANAGER: TEAM ============================== */
+
+function renderManagerTeam(){
+  return `
+  <div class="pagehead">
+    <div><h1>Team</h1><p>Set each person's role level, hours type, and pay rate. Level decides which shifts they're allowed to cover.</p></div>
+    <button class="btn btn-primary" data-act="addEmployee">+ Add employee</button>
+  </div>
+  <div class="card"><div class="tbl-wrap"><table>
+    <tr><th>Name</th><th>Home role</th><th>Can cover</th><th>Hours type</th><th>Rate</th><th>This week</th><th></th></tr>
+    ${EMPLOYEES.map(e=>{
+      const canCover = POSITIONS.filter(p=>e.level>=p.minLevel).map(p=>p.short).join(', ');
+      const hrs = weeklyHours(e.id, payrollWeek);
+      const cap = capFor(e);
+      const near = hrs >= cap-2 ;
+      return `<tr>
+        <td><div class="row" style="gap:8px;"><span class="avatar">${initials(e.name)}</span><b>${esc(e.name)}</b></div></td>
+        <td>${posChip(e.home)}</td>
+        <td style="max-width:180px;">${canCover}</td>
+        <td>${e.type==='part-time'?'<span class="chip chip-neutral">Part-time</span>':'<span class="chip chip-neutral">Full-time</span>'}</td>
+        <td class="mono">$${e.rate.toFixed(2)}/hr</td>
+        <td class="mono">${hrs.toFixed(1)} / ${cap} hrs ${near?'<span class="chip chip-warn" style="margin-left:6px;">near cap</span>':''}</td>
+        <td><button class="btn btn-sm" data-act="editEmployee" data-id="${e.id}">Edit</button></td>
+      </tr>`;
+    }).join('')}
+  </table></div></div>`;
+}
+
+/* ============================== MANAGER: REQUESTS ============================== */
+
+function reqStatusChip(st){
+  const map = {
+    open:['chip-crit','Open'], pending_direct:['chip-warn','Awaiting reply'], pending:['chip-warn','Pending'],
+    covered:['chip-good','Covered'], accepted:['chip-good','Accepted'], declined:['chip-neutral','Declined'],
+    declined_direct:['chip-neutral','Declined'], denied_manager:['chip-neutral','Denied by manager']
+  };
+  const v = map[st]||['chip-neutral',st];
+  return '<span class="chip '+v[0]+'"><span class="dot-ic"></span>'+v[1]+'</span>';
+}
+
+function renderManagerRequests(){
+  const active = requests.filter(r=>['open','pending_direct','pending'].includes(r.status)).sort((a,b)=> b.createdAt<a.createdAt?-1:1);
+  const resolved = requests.filter(r=>!['open','pending_direct','pending'].includes(r.status)).sort((a,b)=> b.createdAt<a.createdAt?-1:1).slice(0,12);
+  function rowFor(r){
+    const s = shiftStore[r.shiftId];
+    if(r.kind==='callout'){
+      return `<tr>
+        <td>${reqStatusChip(r.status)}</td>
+        <td>Call-out</td>
+        <td>${esc(empById(r.fromEmp).name)}</td>
+        <td>${posChip(s.position)} ${fmtDateShort(s.date)} ${fmtTime(s.start)}–${fmtTime(s.end)}</td>
+        <td>${r.toEmp? esc(empById(r.toEmp).name) : '<span class="note">anyone eligible</span>'}</td>
+        <td><div class="row" style="gap:6px;">
+          ${['open','pending_direct'].includes(r.status)?`<button class="btn btn-sm" data-act="mgrAssign" data-shift="${s.id}">Assign someone</button><button class="btn btn-sm btn-danger" data-act="mgrDeny" data-req="${r.id}">Deny</button>`:''}
+        </div></td>
+      </tr>`;
+    }
+    const s2 = shiftStore[r.targetShiftId];
+    return `<tr>
+      <td>${reqStatusChip(r.status)}</td>
+      <td>Swap</td>
+      <td>${esc(empById(r.fromEmp).name)} ↔ ${esc(empById(r.toEmp).name)}</td>
+      <td>${posChip(s.position)} ${fmtDateShort(s.date)}</td>
+      <td>${posChip(s2.position)} ${fmtDateShort(s2.date)}</td>
+      <td>${r.status==='pending'?`<button class="btn btn-sm btn-danger" data-act="mgrCancelSwap" data-req="${r.id}">Cancel</button>`:''}</td>
+    </tr>`;
+  }
+  return `
+  <div class="pagehead"><div><h1>Requests</h1><p>Call-outs and swaps that need — or recently got — a resolution.</p></div></div>
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-pad" style="padding-bottom:0;"><h3 style="margin:0 0 4px;font-size:14px;">Needs attention (${active.length})</h3></div>
+    <div class="tbl-wrap">${active.length? `<table><tr><th>Status</th><th>Type</th><th>From</th><th>Shift</th><th>To</th><th></th></tr>${active.map(rowFor).join('')}</table>` : '<div class="empty-state">Nothing pending — every shift is covered.</div>'}</div>
+  </div>
+  <div class="card">
+    <div class="card-pad" style="padding-bottom:0;"><h3 style="margin:0 0 4px;font-size:14px;">Recent activity</h3></div>
+    <div class="tbl-wrap"><table><tr><th>Status</th><th>Type</th><th>Who</th><th>Shift</th><th>Covered by</th><th></th></tr>${resolved.map(rowFor).join('')}</table></div>
+  </div>`;
+}
+
+/* ============================== MANAGER: PAYROLL ============================== */
+
+function weekLabel(wk){ return fmtDateShort(wk)+' – '+fmtDateShort(addDaysStr(wk,6)); }
+
+function renderManagerPayroll(){
+  const wk = payrollWeek;
+  const rows = EMPLOYEES.map(e=>{
+    const hrs = weeklyHours(e.id, wk);
+    const cap = capFor(e);
+    const pay = hrs*e.rate;
+    let capChip = '<span class="chip chip-good">OK</span>';
+    if(hrs > cap) capChip = '<span class="chip chip-crit">Over cap</span>';
+    else if(hrs >= cap-2) capChip = '<span class="chip chip-warn">Near cap</span>';
+    return {e,hrs,cap,pay,capChip};
+  });
+  const totalHrs = rows.reduce((a,r)=>a+r.hrs,0);
+  const totalPay = rows.reduce((a,r)=>a+r.pay,0);
+  return `
+  <div class="pagehead"><div><h1>Payroll</h1><p>Scheduled hours × rate, by week. Not a timesheet — this reflects what's on the schedule.</p></div></div>
+  <div class="row" style="margin-bottom:14px;">
+    <button class="btn btn-sm" data-act="payWeekPrev">← Prior week</button>
+    <b class="mono">${weekLabel(wk)}</b>
+    <button class="btn btn-sm" data-act="payWeekNext">Next week →</button>
+  </div>
+  <div class="row" style="gap:12px;margin-bottom:16px;">
+    <div class="stat-tile"><div class="num mono">${totalHrs.toFixed(1)}</div><div class="lbl">Scheduled hours</div></div>
+    <div class="stat-tile"><div class="num mono">$${totalPay.toFixed(0)}</div><div class="lbl">Estimated payroll</div></div>
+    <div class="stat-tile"><div class="num mono">${rows.filter(r=>r.hrs>r.cap).length}</div><div class="lbl">Employees over cap</div></div>
+  </div>
+  <div class="card"><div class="tbl-wrap"><table>
+    <tr><th>Employee</th><th>Type</th><th>Rate</th><th>Hours</th><th>Cap</th><th>Status</th><th>Est. pay</th></tr>
+    ${rows.map(r=>`<tr>
+      <td><div class="row" style="gap:8px;"><span class="avatar">${initials(r.e.name)}</span>${esc(r.e.name)}</div></td>
+      <td>${r.e.type==='part-time'?'Part-time':'Full-time'}</td>
+      <td class="mono">$${r.e.rate.toFixed(2)}/hr</td>
+      <td class="mono">${r.hrs.toFixed(1)}</td>
+      <td class="mono">${r.cap}</td>
+      <td>${r.capChip}</td>
+      <td class="mono"><b>$${r.pay.toFixed(2)}</b></td>
+    </tr>`).join('')}
+    <tr><td colspan="3"><b>Total</b></td><td class="mono"><b>${totalHrs.toFixed(1)}</b></td><td></td><td></td><td class="mono"><b>$${totalPay.toFixed(2)}</b></td></tr>
+  </table></div></div>`;
+}
+
+/* ============================== MANAGER: FAIRNESS ============================== */
+
+function renderManagerFairness(){
+  const wk = payrollWeek;
+  const groups = ['mgr','lead','tech'].map(id=>parityForHome(id, wk));
+  const overall = overallParity(wk);
+  function scoreColor(sc){ return sc>=85? 'var(--good)' : sc>=70? 'var(--warn)' : 'var(--crit)'; }
+  function scoreTone(sc){ return sc>=85? 'chip-good' : sc>=70? 'chip-warn' : 'chip-crit'; }
+  return `
+  <div class="pagehead"><div><h1>Shift fairness</h1><p>How evenly hours are spread within each role this week. 100% = everyone in the role worked the same hours.</p></div></div>
+  <div class="row" style="margin-bottom:16px;">
+    <button class="btn btn-sm" data-act="payWeekPrev">← Prior week</button>
+    <b class="mono">${weekLabel(wk)}</b>
+    <button class="btn btn-sm" data-act="payWeekNext">Next week →</button>
+  </div>
+  <div class="card card-pad" style="margin-bottom:16px;display:flex;align-items:center;gap:16px;">
+    <div class="stat-tile" style="border-color:${scoreColor(overall)};"><div class="num mono" style="color:${scoreColor(overall)};">${overall}%</div><div class="lbl">Overall parity score</div></div>
+    <p class="note" style="margin:0;max-width:440px;">Parity score = 100 × (1 − (highest hrs − lowest hrs) ÷ highest hrs) among employees who share a role, averaged across roles with more than one person.</p>
+  </div>
+  <div class="grid" style="gap:12px;">
+  ${groups.filter(g=>g.hours.length>1).map(g=>`
+    <div class="card card-pad">
+      <div class="row" style="justify-content:space-between;margin-bottom:8px;">
+        <div class="row">${posChip(g.position.id)}<b>${g.position.name}</b></div>
+        <span class="chip ${scoreTone(g.score)}">${g.score}% parity</span>
+      </div>
+      ${g.hours.sort((a,b)=>b.hrs-a.hrs).map(h=>`
+        <div class="meter-row">
+          <span style="font-size:13px;">${esc(h.emp.name)}</span>
+          <div class="meter-track"><div class="meter-fill" style="width:${g.max>0?(h.hrs/g.max*100):0}%;background:${posById(g.position.id).chip==='chip-mgr'?'var(--pos-mgr)':posById(g.position.id).chip==='chip-lead'?'var(--pos-lead)':'var(--pos-tech)'};"></div></div>
+          <span class="mono" style="text-align:right;font-size:12.5px;">${h.hrs.toFixed(1)}h</span>
+        </div>`).join('')}
+    </div>`).join('')}
+  ${groups.filter(g=>g.hours.length<=1).length? `<div class="note">Roles with only one person (e.g. Site Manager) aren't scored — there's no one to compare against.</div>`:''}
+  </div>`;
+}
+
+/* ============================== EMPLOYEE: SCHEDULE ============================== */
+
+function renderEmployeeSchedule(){
+  const e = empById(user.empId);
+  const upcoming = Object.values(shiftStore).filter(s=> s.employeeId===e.id && s.date>=todayStr()).sort((a,b)=> a.date<b.date?-1:1).slice(0,8);
+  return `
+  <div class="pagehead"><div><h1>My schedule</h1><p>Your shifts for the month. Tap a day for details, or use a shift below to call out or swap.</p></div></div>
+  <div class="card card-pad" style="margin-bottom:18px;">${renderCalendar(e.id)}</div>
+  <h3 style="font-size:14px;margin:0 0 10px;">Upcoming shifts</h3>
+  <div class="card"><div class="tbl-wrap"><table>
+    <tr><th>Date</th><th>Role</th><th>Time</th><th>Status</th><th></th></tr>
+    ${upcoming.length? upcoming.map(s=>`<tr>
+      <td>${fmtDateShort(s.date)}</td><td>${posChip(s.position)}</td><td class="mono">${fmtTime(s.start)}–${fmtTime(s.end)}</td><td>${statusChip(s)}</td>
+      <td><div class="row" style="gap:6px;">
+        ${s.status==='assigned'?`<button class="btn btn-sm" data-act="empCallout" data-shift="${s.id}">Call out</button><button class="btn btn-sm" data-act="empSwap" data-shift="${s.id}">Swap</button>`:'<span class="note">—</span>'}
+      </div></td>
+    </tr>`).join('') : '<tr><td colspan="5" class="empty-state">No upcoming shifts.</td></tr>'}
+  </table></div></div>`;
+}
+
+/* ============================== EMPLOYEE: OPEN SHIFTS ============================== */
+
+function renderEmployeeOpen(){
+  const e = empById(user.empId);
+  const open = Object.values(shiftStore).filter(s=> ['open','pending_direct'].includes(s.status) && s.date>=todayStr())
+    .filter(s=> s.status==='open' || s.askedEmployeeId===e.id)
+    .sort((a,b)=> a.date<b.date?-1:1);
+  return `
+  <div class="pagehead"><div><h1>Open shifts</h1><p>Shifts you're qualified to pick up. Grabbing one updates your schedule immediately.</p></div></div>
+  <div class="card"><div class="tbl-wrap"><table>
+    <tr><th>Date</th><th>Role</th><th>Time</th><th>Reason</th><th>Status</th><th></th></tr>
+    ${open.length? open.map(s=>{
+      const ev = evaluateAssign(e.id, s);
+      const direct = s.askedEmployeeId===e.id;
+      return `<tr>
+        <td>${fmtDateShort(s.date)}</td><td>${posChip(s.position)}</td><td class="mono">${fmtTime(s.start)}–${fmtTime(s.end)}</td>
+        <td class="note">${esc(s.note||'—')}</td>
+        <td>${direct?'<span class="chip chip-warn">Asked you</span>':statusChip(s)}</td>
+        <td>
+          ${direct? `<div class="row" style="gap:6px;"><button class="btn btn-sm btn-primary" data-act="empAcceptDirect" data-shift="${s.id}" ${ev.ok?'':'disabled'}>Accept</button><button class="btn btn-sm" data-act="empDeclineDirect" data-shift="${s.id}">Decline</button></div>`
+          : `<button class="btn btn-sm btn-primary" data-act="empGrab" data-shift="${s.id}" ${ev.ok?'':'disabled'} title="${ev.ok?'':esc(ev.reasons.join(' '))}">Grab shift</button>`}
+          ${!ev.ok? `<div class="note" style="color:var(--crit-ink);margin-top:4px;">${esc(ev.reasons[0])}</div>` : (ev.caution.length? `<div class="note" style="margin-top:4px;">${esc(ev.caution[0])}</div>`:'')}
+        </td>
+      </tr>`;
+    }).join('') : "<tr><td colspan=\"6\" class=\"empty-state\">No open shifts you're eligible for right now.</td></tr>"}
+  </table></div></div>`;
+}
+
+/* ============================== EMPLOYEE: AVAILABILITY ============================== */
+
+function renderEmployeeAvailability(){
+  const e = empById(user.empId);
+  const avail = AVAILABILITY[e.id]||{};
+  const days = [1,2,3,4,5,6,0];
+  return `
+  <div class="pagehead"><div><h1>My availability</h1><p>Set the hours you can generally work each week. Coverboard uses this to flag shifts outside your window.</p></div></div>
+  <div class="card"><div class="tbl-wrap"><table>
+    <tr><th>Day</th><th>Available</th><th>From</th><th>To</th></tr>
+    ${days.map(d=>{
+      const w = (avail[d]||[])[0];
+      const on = !!w;
+      return `<tr>
+        <td><b>${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d]}</b></td>
+        <td><label class="row" style="gap:6px;"><input type="checkbox" data-act="availToggle" data-day="${d}" ${on?'checked':''}/> ${on?'Available':'Unavailable'}</label></td>
+        <td><input class="field mono" type="time" data-act="availStart" data-day="${d}" value="${on?w.start:'08:00'}" ${on?'':'disabled'} style="max-width:120px;"/></td>
+        <td><input class="field mono" type="time" data-act="availEnd" data-day="${d}" value="${on?w.end:'17:00'}" ${on?'':'disabled'} style="max-width:120px;"/></td>
+      </tr>`;
+    }).join('')}
+  </table></div></div>
+  <p class="note" style="margin-top:10px;">Changes save automatically.</p>`;
+}
+
+/* ============================== EMPLOYEE: REQUESTS ============================== */
+
+function renderEmployeeRequests(){
+  const e = empById(user.empId);
+  const mine = requests.filter(r=> r.fromEmp===e.id || r.toEmp===e.id).sort((a,b)=> b.createdAt<a.createdAt?-1:1);
+  function rowFor(r){
+    if(r.kind==='callout'){
+      const s = shiftStore[r.shiftId];
+      const incoming = r.toEmp===e.id && r.status==='pending_direct';
+      return `<tr>
+        <td>${reqStatusChip(r.status)}</td><td>Call-out</td>
+        <td>${r.fromEmp===e.id?'You':esc(empById(r.fromEmp).name)}</td>
+        <td>${posChip(s.position)} ${fmtDateShort(s.date)}</td>
+        <td>${incoming?`<div class="row" style="gap:6px;"><button class="btn btn-sm btn-primary" data-act="empAcceptDirect" data-shift="${s.id}">Accept</button><button class="btn btn-sm" data-act="empDeclineDirect" data-shift="${s.id}">Decline</button></div>`:'<span class="note">—</span>'}</td>
+      </tr>`;
+    }
+    const s = shiftStore[r.shiftId], s2 = shiftStore[r.targetShiftId];
+    const incoming = r.toEmp===e.id && r.status==='pending';
+    return `<tr>
+      <td>${reqStatusChip(r.status)}</td><td>Swap</td>
+      <td>${esc(empById(r.fromEmp).name)} ↔ ${esc(empById(r.toEmp).name)}</td>
+      <td>${posChip(s.position)} ${fmtDateShort(s.date)} ↔ ${posChip(s2.position)} ${fmtDateShort(s2.date)}</td>
+      <td>${incoming?`<div class="row" style="gap:6px;"><button class="btn btn-sm btn-primary" data-act="empAcceptSwap" data-req="${r.id}">Accept</button><button class="btn btn-sm" data-act="empDeclineSwap" data-req="${r.id}">Decline</button></div>`:'<span class="note">—</span>'}</td>
+    </tr>`;
+  }
+  return `
+  <div class="pagehead"><div><h1>My requests</h1><p>Call-outs and swaps you've sent or received.</p></div></div>
+  <div class="card"><div class="tbl-wrap"><table><tr><th>Status</th><th>Type</th><th>Who</th><th>Shift(s)</th><th></th></tr>
+  ${mine.length? mine.map(rowFor).join('') : '<tr><td colspan="5" class="empty-state">No requests yet.</td></tr>'}
+  </table></div></div>`;
+}
+
+/* ============================== EMPLOYEE: PAY ============================== */
+
+function renderEmployeePay(){
+  const e = empById(user.empId);
+  const wk = payrollWeek;
+  const hrs = weeklyHours(e.id, wk);
+  const cap = capFor(e);
+  const pay = hrs*e.rate;
+  return `
+  <div class="pagehead"><div><h1>My pay</h1><p>Based on your scheduled hours, not clocked time.</p></div></div>
+  <div class="row" style="margin-bottom:14px;">
+    <button class="btn btn-sm" data-act="payWeekPrev">← Prior week</button>
+    <b class="mono">${weekLabel(wk)}</b>
+    <button class="btn btn-sm" data-act="payWeekNext">Next week →</button>
+  </div>
+  <div class="row" style="gap:12px;">
+    <div class="stat-tile"><div class="num mono">${hrs.toFixed(1)}</div><div class="lbl">Scheduled hrs / ${cap} cap</div></div>
+    <div class="stat-tile"><div class="num mono">$${e.rate.toFixed(2)}</div><div class="lbl">Hourly rate</div></div>
+    <div class="stat-tile"><div class="num mono">$${pay.toFixed(2)}</div><div class="lbl">Estimated pay</div></div>
+  </div>`;
+}
+
+/* ============================== MAIN RENDER ============================== */
+
+const MGR_TABS = [
+  ['schedule','🗓️','Schedule'], ['rules','⚙️','Staffing rules'], ['team','👥','Team'],
+  ['requests','📥','Requests'], ['payroll','💵','Payroll'], ['fairness','⚖️','Fairness']
+];
+const EMP_TABS = [
+  ['schedule','🗓️','My schedule'], ['open','📋','Open shifts'], ['availability','🕒','Availability'],
+  ['requests','📥','My requests'], ['pay','💵','My pay']
+];
+
+function renderSidenav(){
+  const isMgr = user.kind==='manager';
+  const tabs = isMgr? MGR_TABS : EMP_TABS;
+  const activeKey = isMgr? nav.manager : nav.employee;
+  return `<nav class="sidenav">
+    <div class="navlabel">${isMgr?'Manager':'My workspace'}</div>
+    ${tabs.map(([key,ic,lbl])=>`<button class="navbtn ${activeKey===key?'active':''}" data-act="nav" data-tab="${key}"><span class="ic">${ic}</span>${lbl}</button>`).join('')}
+  </nav>`;
+}
+
+function renderMain(){
+  if(user.kind==='manager'){
+    const map = {schedule:renderManagerSchedule, rules:renderManagerRules, team:renderManagerTeam, requests:renderManagerRequests, payroll:renderManagerPayroll, fairness:renderManagerFairness};
+    return (map[nav.manager]||renderManagerSchedule)();
+  }
+  const map = {schedule:renderEmployeeSchedule, open:renderEmployeeOpen, availability:renderEmployeeAvailability, requests:renderEmployeeRequests, pay:renderEmployeePay};
+  return (map[nav.employee]||renderEmployeeSchedule)();
+}
+
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    ${renderTopbar()}
+    <div class="demo-banner"><b>Interactive prototype</b> — sample data for a small crew. Everything you do here runs the real rules (eligibility, hour caps, fairness), but state lives only in this browser tab.</div>
+    <div class="shell">
+      ${renderSidenav()}
+      <main>${renderMain()}</main>
+    </div>
+  `;
+  renderModal();
+  bindStaticHandlers();
+}
+
+/* ============================== MODALS ============================== */
+
+function closeModal(){ modal=null; renderModal(); }
+
+function renderModal(){
+  const root = document.getElementById('modalRoot');
+  if(!modal){ root.innerHTML=''; return; }
+  root.innerHTML = modalHtml(modal);
+  bindModalHandlers();
+}
+
+function modalHtml(m){
+  if(m.type==='notif') return notifModal();
+  if(m.type==='dayDetail') return dayDetailModal(m.date);
+  if(m.type==='callout') return calloutModal(m.shiftId);
+  if(m.type==='swap') return swapModal(m.shiftId);
+  if(m.type==='assign') return assignModal(m.shiftId, m.force);
+  if(m.type==='addRule' || m.type==='editRule') return ruleModal(m.ruleId);
+  if(m.type==='addEmployee' || m.type==='editEmployee') return employeeModal(m.empId);
+  return '';
+}
+
+function notifModal(){
+  return `<div class="overlay" data-act="closeOverlay"><div class="modal" data-stop>
+    <div class="modal-head"><h3>Notifications</h3><button class="x-btn" data-act="closeModal">✕</button></div>
+    <div class="modal-body">
+      <p class="note">On a real phone these would push straight to you. Here they're logged below.</p>
+      ${notifications.length? notifications.slice(0,30).map(n=>`
+        <div class="row" style="align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">
+          <span style="font-size:15px;">${({callout:'📤',covered:'✅',attention:'⚠️',swap:'🔁',override:'🛠️'})[n.kind]||'🔔'}</span>
+          <span style="font-size:13px;flex:1;${n.read?'color:var(--ink-2);':'font-weight:600;'}">${esc(n.text)}</span>
+        </div>`).join('') : '<div class="empty-state">No notifications yet.</div>'}
+    </div>
+    <div class="modal-foot"><button class="btn" data-act="markAllRead">Mark all read</button><button class="btn btn-primary" data-act="closeModal">Close</button></div>
+  </div></div>`;
+}
+
+function dayDetailModal(date){
+  const shifts = shiftsOnDate(date);
+  const isMgr = user.kind==='manager';
+  const e = isMgr? null : empById(user.empId);
+  return `<div class="overlay" data-act="closeOverlay"><div class="modal" data-stop>
+    <div class="modal-head"><h3>${fmtDateLong(date)}</h3><button class="x-btn" data-act="closeModal">✕</button></div>
+    <div class="modal-body">
+      ${shifts.length? shifts.map(s=>{
+        const mine = !isMgr && s.employeeId===e.id;
+        return `<div class="card-pad" style="border:1px solid var(--line);border-radius:10px;">
+          <div class="row" style="justify-content:space-between;">
+            <div class="row">${posChip(s.position)}<span class="mono">${fmtTime(s.start)}–${fmtTime(s.end)}</span></div>
+            ${statusChip(s)}
+          </div>
+          <div class="row" style="justify-content:space-between;margin-top:8px;">
+            <span style="font-size:13px;">${s.employeeId? (isMgr?esc(empById(s.employeeId).name):(mine?'You':esc(empById(s.employeeId).name))) : (s.askedEmployeeId? 'Asked '+esc(empById(s.askedEmployeeId).name) : 'Nobody assigned')}</span>
+            ${isMgr? `<div class="row" style="gap:6px;"><button class="btn btn-sm" data-act="mgrAssign" data-shift="${s.id}">${s.employeeId?'Reassign':'Assign'}</button>${s.employeeId?`<button class="btn btn-sm" data-act="mgrOpen" data-shift="${s.id}">Mark open</button>`:''}</div>`
+             : (mine? `<div class="row" style="gap:6px;"><button class="btn btn-sm" data-act="empCallout" data-shift="${s.id}">Call out</button><button class="btn btn-sm" data-act="empSwap" data-shift="${s.id}">Swap</button></div>`
+             : (s.status==='open'||s.askedEmployeeId===e.id ? `<button class="btn btn-sm btn-primary" data-act="${s.askedEmployeeId===e.id?'empAcceptDirect':'empGrab'}" data-shift="${s.id}">${s.askedEmployeeId===e.id?'Accept':'Grab'}</button>` : ''))}
+          </div>
+          ${r_overlapNote(s)}
+        </div>`;
+      }).join('') : '<div class="empty-state">Nothing scheduled this day.</div>'}
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary" data-act="closeModal">Close</button></div>
+  </div></div>`;
+}
+function r_overlapNote(s){
+  return s.overlap>0 ? `<div class="note" style="margin-top:6px;">${s.overlap}-minute handoff overlap built into this shift's start/end.</div>` : '';
+}
+
+function calloutModal(shiftId){
+  const s = shiftStore[shiftId];
+  const e = empById(user.empId);
+  const coworkers = EMPLOYEES.filter(x=>x.id!==e.id && isEligible(x, s.position));
+  return `<div class="overlay" data-act="closeOverlay"><div class="modal" data-stop>
+    <div class="modal-head"><h3>Call out of this shift</h3><button class="x-btn" data-act="closeModal">✕</button></div>
+    <div class="modal-body">
+      <div class="note">${posChip(s.position)} ${fmtDateLong(s.date)} · ${fmtTime(s.start)}–${fmtTime(s.end)}</div>
+      <div class="field-wrap"><label class="field-label">Reason (optional)</label><input class="field" id="calloutNote" placeholder="e.g. feeling sick"/></div>
+      <div class="field-wrap">
+        <label class="field-label">Who should be able to cover it?</label>
+        <select class="field" id="calloutMode">
+          <option value="open">Open to all eligible coworkers</option>
+          <option value="direct">Ask one specific coworker</option>
+        </select>
+      </div>
+      <div class="field-wrap" id="calloutTargetWrap" style="display:none;">
+        <label class="field-label">Coworker</label>
+        <select class="field" id="calloutTarget">${coworkers.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join('')}</select>
+      </div>
+      <div class="warnbox">This immediately opens the shift and notifies your manager.</div>
+    </div>
+    <div class="modal-foot"><button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-primary" data-act="submitCallout" data-shift="${shiftId}">Confirm call-out</button></div>
+  </div></div>`;
+}
+
+function swapModal(shiftId){
+  const s = shiftStore[shiftId];
+  const e = empById(user.empId);
+  const candidates = Object.values(shiftStore).filter(o=>
+    o.employeeId && o.employeeId!==e.id && o.status==='assigned' && o.date>=todayStr() && o.date<=addDaysStr(todayStr(),21)
+    && isEligible(e, o.position) && isEligible(empById(o.employeeId), s.position)
+  ).sort((a,b)=>a.date<b.date?-1:1).slice(0,20);
+  return `<div class="overlay" data-act="closeOverlay"><div class="modal" data-stop>
+    <div class="modal-head"><h3>Propose a swap</h3><button class="x-btn" data-act="closeModal">✕</button></div>
+    <div class="modal-body">
+      <div class="note">Your shift: ${posChip(s.position)} ${fmtDateLong(s.date)} · ${fmtTime(s.start)}–${fmtTime(s.end)}</div>
+      <div class="field-wrap"><label class="field-label">Trade with</label>
+        <div class="list-pick" id="swapPickList">
+          ${candidates.length? candidates.map(c=>`<label class="pick-row"><input type="radio" name="swapPick" value="${c.id}"/> <span>${esc(empById(c.employeeId).name)} — ${posChip(c.position)} ${fmtDateShort(c.date)} · ${fmtTime(c.start)}–${fmtTime(c.end)}</span></label>`).join('') : '<div class="empty-state">No mutually-eligible shifts to swap with in the next 3 weeks.</div>'}
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-primary" data-act="submitSwap" data-shift="${shiftId}" ${candidates.length?'':'disabled'}>Send swap request</button></div>
+  </div></div>`;
+}
+
+function assignModal(shiftId, force){
+  const s = shiftStore[shiftId];
+  const candidates = EMPLOYEES.map(c=>({c, ev: evaluateAssign(c.id, s, {ignoreCap:force, ignoreDouble:force})}));
+  return `<div class="overlay" data-act="closeOverlay"><div class="modal" data-stop>
+    <div class="modal-head"><h3>${s.employeeId?'Reassign':'Assign'} shift</h3><button class="x-btn" data-act="closeModal">✕</button></div>
+    <div class="modal-body">
+      <div class="note">${posChip(s.position)} ${fmtDateLong(s.date)} · ${fmtTime(s.start)}–${fmtTime(s.end)}</div>
+      <div class="list-pick">
+        ${candidates.map(({c,ev})=>`
+          <label class="pick-row" style="${ev.ok?'':'opacity:.55;'}">
+            <input type="radio" name="assignPick" value="${c.id}" ${ev.ok?'':(force?'':'disabled')}/>
+            <span style="flex:1;">${esc(c.name)} <span class="note">(${posChip(c.home)} · ${ev.projectedHours.toFixed(1)}/${ev.cap}h)</span></span>
+            ${!ev.ok? '<span class="chip chip-crit">'+esc(ev.reasons[0])+'</span>' : ''}
+          </label>`).join('')}
+      </div>
+      <label class="row" style="gap:8px;"><input type="checkbox" id="assignForce" ${force?'checked':''} data-act="toggleForce" data-shift="${shiftId}"/> <span style="font-size:12.5px;">Override cap / eligibility warnings</span></label>
+    </div>
+    <div class="modal-foot"><button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-primary" data-act="submitAssign" data-shift="${shiftId}" data-force="${force?'1':''}">Save assignment</button></div>
+  </div></div>`;
+}
+
+function ruleModal(ruleId){
+  const r = ruleId? RULES.find(x=>x.id===ruleId) : {dayOfWeek:1, position:'tech', start:'08:00', end:'12:00', count:1, overlap:0};
+  return `<div class="overlay" data-act="closeOverlay"><div class="modal" data-stop>
+    <div class="modal-head"><h3>${ruleId?'Edit':'Add'} staffing rule</h3><button class="x-btn" data-act="closeModal">✕</button></div>
+    <div class="modal-body">
+      <div class="field-wrap"><label class="field-label">Day</label><select class="field" id="ruleDay">${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map((n,i)=>'<option value="'+i+'" '+(r.dayOfWeek===i?'selected':'')+'>'+n+'</option>').join('')}</select></div>
+      <div class="field-wrap"><label class="field-label">Position</label><select class="field" id="rulePos">${POSITIONS.map(p=>'<option value="'+p.id+'" '+(r.position===p.id?'selected':'')+'>'+p.name+'</option>').join('')}</select></div>
+      <div class="row" style="gap:10px;">
+        <div class="field-wrap" style="flex:1;"><label class="field-label">Start</label><input class="field" type="time" id="ruleStart" value="${r.start}"/></div>
+        <div class="field-wrap" style="flex:1;"><label class="field-label">End</label><input class="field" type="time" id="ruleEnd" value="${r.end}"/></div>
+      </div>
+      <div class="row" style="gap:10px;">
+        <div class="field-wrap" style="flex:1;"><label class="field-label">People needed</label><input class="field" type="number" min="1" max="20" id="ruleCount" value="${r.count}"/></div>
+        <div class="field-wrap" style="flex:1;"><label class="field-label">Handoff overlap (min)</label><input class="field" type="number" min="0" max="120" id="ruleOverlap" value="${r.overlap}"/></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      ${ruleId?`<button class="btn btn-danger" data-act="delRule" data-id="${ruleId}">Delete</button>`:''}
+      <button class="btn" data-act="closeModal">Cancel</button>
+      <button class="btn btn-primary" data-act="saveRule" data-id="${ruleId||''}">Save</button>
+    </div>
+  </div></div>`;
+}
+
+function employeeModal(empId){
+  const e = empId? empById(empId) : {name:'', home:'tech', level:1, type:'full-time', rate:17};
+  return `<div class="overlay" data-act="closeOverlay"><div class="modal" data-stop>
+    <div class="modal-head"><h3>${empId?'Edit':'Add'} employee</h3><button class="x-btn" data-act="closeModal">✕</button></div>
+    <div class="modal-body">
+      <div class="field-wrap"><label class="field-label">Name</label><input class="field" id="empName" value="${esc(e.name)}" ${empId?'':''}/></div>
+      <div class="field-wrap"><label class="field-label">Home role &amp; level</label>
+        <select class="field" id="empHome">${POSITIONS.map(p=>'<option value="'+p.id+'" '+(e.home===p.id?'selected':'')+'>'+p.name+' (level '+p.minLevel+')</option>').join('')}</select>
+        <span class="note">Their level lets them cover this role and anything below it.</span>
+      </div>
+      <div class="row" style="gap:10px;">
+        <div class="field-wrap" style="flex:1;"><label class="field-label">Hours type</label>
+          <select class="field" id="empType"><option value="full-time" ${e.type==='full-time'?'selected':''}>Full-time (cap 40/wk)</option><option value="part-time" ${e.type==='part-time'?'selected':''}>Part-time (cap 39.9/wk)</option></select>
+        </div>
+        <div class="field-wrap" style="flex:1;"><label class="field-label">Hourly rate</label><input class="field" type="number" step="0.25" min="0" id="empRate" value="${e.rate}"/></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-primary" data-act="saveEmployee" data-id="${empId||''}">Save</button></div>
+  </div></div>`;
+}
+
+/* ============================== EVENT HANDLING ============================== */
+
+function bindStaticHandlers(){
+  document.getElementById('app').onclick = onAppClick;
+  document.getElementById('app').onchange = onAppChange;
+}
+function bindModalHandlers(){
+  const root = document.getElementById('modalRoot');
+  root.onclick = onModalClick;
+  root.onchange = onModalChange;
+}
+
+function onAppClick(ev){
+  const t = ev.target.closest('[data-act]');
+  if(!t) return;
+  const act = t.dataset.act;
+  if(act==='nav'){ if(user.kind==='manager') nav.manager=t.dataset.tab; else nav.employee=t.dataset.tab; render(); return; }
+  if(act==='openNotif'){ modal={type:'notif'}; renderModal(); return; }
+  if(act==='resetDemo'){ if(confirm('Reset all demo data back to the starting sample?')) resetDemo(); return; }
+  if(act==='monthPrev'){ shiftMonth(-1); return; }
+  if(act==='monthNext'){ shiftMonth(1); return; }
+  if(act==='monthToday'){ viewMonth={y:TODAY.getFullYear(), m:TODAY.getMonth()}; render(); return; }
+  if(act==='dayClick'){ modal={type:'dayDetail', date:t.dataset.date}; renderModal(); return; }
+  if(act==='addRule'){ modal={type:'addRule', ruleId:null}; renderModal(); return; }
+  if(act==='editRule'){ modal={type:'editRule', ruleId:t.dataset.id}; renderModal(); return; }
+  if(act==='delRule'){ RULES = RULES.filter(r=>r.id!==t.dataset.id); closeModal(); render(); return; }
+  if(act==='regenFuture'){ seedFill(addDaysStr(todayStr(),1), '2026-11-30'); saveLocal(); render(); return; }
+  if(act==='addEmployee'){ modal={type:'addEmployee', empId:null}; renderModal(); return; }
+  if(act==='editEmployee'){ modal={type:'editEmployee', empId:t.dataset.id}; renderModal(); return; }
+  if(act==='mgrAssign'){ modal={type:'assign', shiftId:t.dataset.shift, force:false}; renderModal(); return; }
+  if(act==='mgrOpen'){ managerOpenShift(t.dataset.shift); closeModal(); render(); return; }
+  if(act==='mgrDeny'){ managerDenyRequest(t.dataset.req); render(); return; }
+  if(act==='mgrCancelSwap'){ const r=requests.find(x=>x.id===t.dataset.req); if(r){ respondSwap(r.id,false); } render(); return; }
+  if(act==='payWeekPrev'){ payrollWeek = addDaysStr(payrollWeek,-7); render(); return; }
+  if(act==='payWeekNext'){ payrollWeek = addDaysStr(payrollWeek,7); render(); return; }
+  if(act==='empCallout'){ modal={type:'callout', shiftId:t.dataset.shift}; renderModal(); return; }
+  if(act==='empSwap'){ modal={type:'swap', shiftId:t.dataset.shift}; renderModal(); return; }
+  if(act==='empGrab'){ const r=grabShift(t.dataset.shift, user.empId); if(!r.ok) alert(r.reasons.join(' ')); render(); return; }
+  if(act==='empAcceptDirect'){ const r=respondDirectAsk(t.dataset.shift, true); if(r&&!r.ok) alert(r.reasons.join(' ')); render(); return; }
+  if(act==='empDeclineDirect'){ respondDirectAsk(t.dataset.shift, false); render(); return; }
+  if(act==='empAcceptSwap'){ const r=respondSwap(t.dataset.req, true); if(!r.ok) alert(r.reasons.join(' ')); render(); return; }
+  if(act==='empDeclineSwap'){ respondSwap(t.dataset.req, false); render(); return; }
+  if(act==='markAllRead'){ notifications.forEach(n=>n.read=true); render(); return; }
+}
+
+function onAppChange(ev){
+  const t = ev.target.closest('[data-act]');
+  if(!t) return;
+  const act = t.dataset.act;
+  if(act==='switchRole'){
+    const v = t.value;
+    user = v==='manager' ? {kind:'manager', empId:null} : {kind:'employee', empId:v};
+    render(); return;
+  }
+  if(act==='availToggle'){
+    const day = Number(t.dataset.day);
+    setAvailabilityDay(user.empId, day, t.checked, '08:00','17:00');
+    render(); return;
+  }
+  if(act==='availStart' || act==='availEnd'){
+    const day = Number(t.dataset.day);
+    const row = t.closest('tr');
+    const startEl = row.querySelector('[data-act="availStart"]');
+    const endEl = row.querySelector('[data-act="availEnd"]');
+    setAvailabilityDay(user.empId, day, true, startEl.value, endEl.value);
+    return;
+  }
+}
+
+function onModalClick(ev){
+  if(ev.target.classList.contains('overlay') && ev.target.dataset.act==='closeOverlay'){ closeModal(); return; }
+  const t = ev.target.closest('[data-act]');
+  if(!t) return;
+  const act = t.dataset.act;
+  if(act==='closeModal'){ closeModal(); return; }
+  if(act==='markAllRead'){ notifications.forEach(n=>n.read=true); render(); return; }
+  if(act==='submitCallout'){
+    const mode = document.getElementById('calloutMode').value;
+    const note = document.getElementById('calloutNote').value.trim();
+    const target = mode==='direct' ? document.getElementById('calloutTarget').value : null;
+    calloutShift(t.dataset.shift, mode, target, note);
+    closeModal(); render(); return;
+  }
+  if(act==='submitSwap'){
+    const picked = document.querySelector('input[name="swapPick"]:checked');
+    if(!picked){ alert('Pick a shift to trade with.'); return; }
+    proposeSwap(t.dataset.shift, picked.value, '');
+    closeModal(); render(); return;
+  }
+  if(act==='toggleForce'){
+    modal.force = t.checked; renderModal(); return;
+  }
+  if(act==='submitAssign'){
+    const picked = document.querySelector('input[name="assignPick"]:checked');
+    if(!picked){ alert('Pick someone to assign.'); return; }
+    const force = document.getElementById('assignForce').checked;
+    const r = managerOverride(t.dataset.shift, picked.value, force);
+    if(!r.ok){ alert(r.reasons.join(' ')+' Check "override" to assign anyway.'); return; }
+    closeModal(); render(); return;
+  }
+  if(act==='delRule'){
+    RULES = RULES.filter(r=>r.id!==t.dataset.id);
+    closeModal(); render(); return;
+  }
+  if(act==='saveRule'){
+    const day = Number(document.getElementById('ruleDay').value);
+    const position = document.getElementById('rulePos').value;
+    const start = document.getElementById('ruleStart').value;
+    const end = document.getElementById('ruleEnd').value;
+    const count = Math.max(1, Number(document.getElementById('ruleCount').value)||1);
+    const overlap = Math.max(0, Number(document.getElementById('ruleOverlap').value)||0);
+    if(toMin(end) <= toMin(start)){ alert('End time must be after start time.'); return; }
+    if(t.dataset.id){
+      const r = RULES.find(x=>x.id===t.dataset.id);
+      Object.assign(r,{dayOfWeek:day,position,start,end,count,overlap});
+    } else {
+      RULES.push({id:uid('r'), dayOfWeek:day, position, start, end, count, overlap});
+    }
+    closeModal(); render(); return;
+  }
+  if(act==='saveEmployee'){
+    const name = document.getElementById('empName').value.trim();
+    if(!name){ alert('Enter a name.'); return; }
+    const home = document.getElementById('empHome').value;
+    const type = document.getElementById('empType').value;
+    const rate = Math.max(0, Number(document.getElementById('empRate').value)||0);
+    const level = posById(home).minLevel;
+    if(t.dataset.id){
+      const e = empById(t.dataset.id);
+      Object.assign(e,{name,home,type,rate,level});
+    } else {
+      const id = uid('e');
+      EMPLOYEES.push({id,name,home,level,type,rate});
+      AVAILABILITY[id] = JSON.parse(JSON.stringify(ALL_DAY));
+    }
+    closeModal(); render(); return;
+  }
+}
+
+function onModalChange(ev){
+  const t = ev.target.closest('[data-act]');
+  if(!t) return;
+  if(t.dataset.act==='calloutMode' || t.id==='calloutMode'){
+    const wrap = document.getElementById('calloutTargetWrap');
+    wrap.style.display = t.value==='direct' ? 'block' : 'none';
+  }
+}
+document.addEventListener('change', function(ev){
+  if(ev.target.id==='calloutMode'){
+    const wrap = document.getElementById('calloutTargetWrap');
+    if(wrap) wrap.style.display = ev.target.value==='direct' ? 'block' : 'none';
+  }
+});
+
+function shiftMonth(delta){
+  let {y,m} = viewMonth;
+  m += delta;
+  if(m<0){ m=11; y--; } if(m>11){ m=0; y++; }
+  viewMonth = {y,m};
+  render();
+}
+
+/* ============================== BOOT ============================== */
+
+function boot(){
+  const restored = loadLocal();
+  if(!restored) initData();
+  render();
+}
+boot();
+
+})();
+</script>
+
+</body></html>
